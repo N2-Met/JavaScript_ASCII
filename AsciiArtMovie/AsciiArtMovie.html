@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>アスキーアート動画変換</title>
+    <script>
+        let canvas, context, video; //キャンバス、ビデオ
+        let sTime = 0, eTime = 0; //開始位置、終了位置
+        let timer;
+
+        //init = 初期化
+        const init = () => {
+            //キャンバス、ビデオ要素の取得
+            canvas = document.getElementById("image");//一時描画用キャンバスの取得
+            context = canvas.getContext("2d");
+            video = dovument.getElementById("video");
+            //変換ボタンの無効化
+            video = document.getElementById("convert").disabled = true;
+        }
+
+        //files 「ファイルを選択」ボタンで指定した動画ファイル
+        const loadVideo = files => {
+            //動画の読み込み
+            video.src = URL.createObjectURL(files[0]);
+            video.onloadedmetadata = () => {
+                let maxTime = video.duration; //動画の最大時間を取得　duration:間隔
+                //再生時間を取得し、プログレスバーとスライダーにセット。取得できない場合、10秒に設定
+                if(!isFinite(maxTime)) maxTime = 10; // isFinite() 値が有限か否か判断する。有限出ない場合、10秒に設定
+                document.getElementById("time").max = maxTime;
+                document.getElementById("time_0").max = maxTime;
+                document.getElementById("time_1").max = maxTime;
+            }
+
+            //再生位置を表示
+            //動画の再生位置が変化した時、再生位置をプログレスバーにセットし、秒数を表示
+            video.ontimeupdate = () =>{
+                const sec = video.currentTime;
+                document.getElementById("time").value = video.currentTime;
+                document.getElementById("sec").innerText = sec.toFixed(1);
+            }
+        }
+
+        const setRange = n =>{
+            //位置を取得
+            const time = document.getElementById('time_${n}').value//値を変更したスライダーの値を取得
+            document.getElementById('sec_${n}').innerText = time;
+            video.currentTime = time;
+            //再生区間をセット
+            sTime = Number(document.getElementById("time_0").value);
+
+        }
+
+
+
+    </script>
+</head>
+
+</html>
