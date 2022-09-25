@@ -76,14 +76,118 @@
                 const dx = (canvas.width - dw) / 2;
                 context.drawImage(video, 0, 0, sw, sh, dx, 0, dw, canvas.height);
                 convertAA();
-            }else{
+            } else {
                 stopConvert();
             }
         }
 
+        const convertAA = () => {
+            //明暗テキストの取得
+            //__明るさを表す文字
+            let aaText = document.getElementById("aaText").value;
+            //半角英数記号以外の文字を削除
+            aaText = aaText.replace(/[^!-~]/g, "");
+            //アスキーアートに変換
+            //__アスキーアート表示エリアをクリア
+            document.getElementById("aa").innerHTML = "";
+            //キャンバスを走査し、(縦は2ピクセルごと)RGBデータを取得
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            for (let y = 0; y < canvas.height; y += 2) {
+                for (let x = 0; x < canvas.eidth; x++) {
+                    let index = (x + y * canvas.width) * 4;
+                    let r = imageData.data[index];
+                    let g = imageData.data[index + 1];
+                    let b = imageData.data[index + 2];
+                    index = (x + (y + 1) * canvas.width) * 4;
+                    r += imageData.data[index];
+                    g += imageData.data[index + 1];
+                    b += imageData.data[index + 2];
+                    //縦2ピクセル分の平均輝度を計算
+                    let mono = (0.299 * r + 0.587 * g + 0.114 * b) / 2
+                    //輝度に応じた文字に変換
+                    let text = aaText[Math.floor(mono / 256 * aaText.length)];
+                    const span = document.createElement("span");
+                    span.innerText = text;
+                    //「カラー」がチェックされているとき
+                    if (document.getElementById("color").checked) {
+                        //元の色（縦2ピクセル分の平均）にする。
+                        r = Math.floor(r / 2);
+                        g = Math.floor(g / 2);
+                        b = Math.floor(b / 2);
+                        span.style.color = 'rgb(${r},${g},${b})';
+                    }
+                    //1文字表示
+                    document.getElementById("aa").appendChild(span);
+                }
+                //1行ごとに改行する
+                const br = document.createElement("br");
+                document.getElementById("aa").appendChild(br);
+            }
+        }
 
+        const stopconvert = () => {
+            //変換の停止
+            //__「タイマーID」をクリア
+            clearInterval(timer);
+            video.pause();//動画の再生を一時停止
+            document.getElementById("convert").disabled = false;
+        }
 
+        //コピーボタンがクリックされた時の動作
+        const copyAA = () => {
+            //アスキーアートを選択
+            //__アスキーアート全体を選択範囲にする。
+            const aa = document.getElementById("aa");
+            const range = document.createRange();
+            range.selectNodeContents(aa);
+            //範囲選択オブジェクトを作成
+            const selection = window.getSelection();
+            //直前の選択をクリアし、アスキーアートを選択状態にする。
+            selection.removeAllRanges();
+            selection.addRange(range);
+            //クリップボードへコピー
+            navigator.clipboard.writeText(selection.toString());
+        }
     </script>
+    <style>
+        /* "#"...ID名をセレクタにする時に使用 */
+        #aaText {
+            font-family: monodpsce;
+            text-align: center;
+        }
+
+        border {
+            border: thin solid #cccccc;
+        }
+
+        input[type="range"] {
+            margin: 0px;
+            width: 480px;
+        }
+
+        #time {
+            width: 480px;
+        }
+
+        #videoArea {
+            display: flex;
+        }
+
+        video {
+            background-color: #000000;
+        }
+
+        #aa {
+            width: 480px;
+            height: 270px;
+            font-size: 10px;
+            font-family: monospace;
+            margin-left: 10px;
+        }
+        #image{display: none;}
+    </style>
+
+
 </head>
 
 </html>
