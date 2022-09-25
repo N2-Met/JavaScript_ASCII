@@ -184,10 +184,34 @@
             font-family: monospace;
             margin-left: 10px;
         }
-        #image{display: none;}
+
+        #image {
+            display: none;
+        }
+
     </style>
 
-
-</head>
+<body onload="init()">
+    <p>アスキーアート動画変換</p>
+    <input type="file" accept="video/*" onchange="loadVideo(this.files)">
+    暗←<input type="text" id="aaText" value="#$*+-.">→明
+    <input tyoe="checkbox" id="color">カラー
+    <input type="button" id="convert" value="変換" onclick="startConvert()">
+    <input type="button" value="停止" onclick="stopConvert()">
+    <input type="button" value="コピー" onclick="copyAA()">
+    <hr>
+    <div id="videoArea">
+        <video id="video" class="border" width="480" height="270" muted></video>
+        <canvas id="image" width="96" height="54"></canvas>
+        <div id="aa" class="boeder"></div>
+    </div>
+    <progress id="time" value="0" min="0" max="10" step="0.1"></progress>
+    [<span id="sec">0</span>s]<br>
+    再生区間：<span id="sSec">0</span>s～<span id="eSec">0</span>s<br>
+    <input type="range" id="time_0" value="0" step="0.1" onchange="setRange(0)">
+    [<span id="sec_0">0</span>s]<br>
+    <input type="range" id="time_1" value="0" step="0.1" onchange="setRange(1)">
+    [<span id="sec_1">0</span>s]
+</body>
 
 </html>
