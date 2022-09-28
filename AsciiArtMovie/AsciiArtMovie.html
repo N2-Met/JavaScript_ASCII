@@ -12,11 +12,11 @@
         //初期化　　　　　　　init=初期化
         const init = () => {
             //キャンバス、ビデオ要素の取得
-            canvas = document.getElementById("image");//一時描画用キャンバスの取得
+            canvas = document.getElementById("image");  //一時描画用キャンバスの取得
             context = canvas.getContext("2d");
-            video = dovument.getElementById("video");
+            video = document.getElementById("video");
             //変換ボタンの無効化
-            video = document.getElementById("convert").disabled = true;
+            document.getElementById("convert").disabled = true;
         }
 
         //動画の読み込み
@@ -26,7 +26,7 @@
             video.onloadedmetadata = () => {
                 let maxTime = video.duration; //動画の最大時間を取得　duration:間隔
                 //再生時間を取得し、プログレスバーとスライダーにセット。取得できない場合、10秒に設定
-                if (!isFinite(maxTime)) maxTime = 10; // isFinite() 値が有限か否か判断する。有限出ない場合、10秒に設定
+                if (!isFinite(maxTime)) maxTime = 10; // isFinite() 値が有限か否か判断する。有限でない場合、10秒に設定
                 document.getElementById("time").max = maxTime;
                 document.getElementById("time_0").max = maxTime;
                 document.getElementById("time_1").max = maxTime;
@@ -43,15 +43,15 @@
 
         const setRange = n => {
             //位置を取得
-            const time = document.getElementById('time_${n}').value//値を変更したスライダーの値を取得
-            document.getElementById('sec_${n}').innerText = time;
+            const time = document.getElementById(`time_${n}`).value;  //値を変更したスライダーの値を取得
+            document.getElementById(`sec_${n}`).innerText = time;
             video.currentTime = time;
             //再生区間をセット
             sTime = Number(document.getElementById("time_0").value);
             eTime = Number(document.getElementById("time_1").value);
             if (sTime > eTime) [sTime, eTime] = [eTime, sTime];
             document.getElementById("sSec").innerText = sTime;  //開始位置を表示
-            document.getElementById("eSec").innerText = sTime;  //終了位置を表示
+            document.getElementById("eSec").innerText = eTime;  //終了位置を表示
             //変換ボタンの有効化
             document.getElementById("convert").disabled = false; //disabled →無効化。　falseで有効化
             if (sTime == eTime) {
@@ -93,7 +93,7 @@
             //キャンバスを走査し、(縦は2ピクセルごと)RGBデータを取得
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
             for (let y = 0; y < canvas.height; y += 2) {
-                for (let x = 0; x < canvas.eidth; x++) {
+                for (let x = 0; x < canvas.width; x++) {
                     let index = (x + y * canvas.width) * 4;
                     let r = imageData.data[index];
                     let g = imageData.data[index + 1];
@@ -103,7 +103,7 @@
                     g += imageData.data[index + 1];
                     b += imageData.data[index + 2];
                     //縦2ピクセル分の平均輝度を計算
-                    let mono = (0.299 * r + 0.587 * g + 0.114 * b) / 2
+                    let mono = (0.299 * r + 0.587 * g + 0.114 * b) / 2;
                     //輝度に応じた文字に変換
                     let text = aaText[Math.floor(mono / 256 * aaText.length)];
                     const span = document.createElement("span");
@@ -114,7 +114,7 @@
                         r = Math.floor(r / 2);
                         g = Math.floor(g / 2);
                         b = Math.floor(b / 2);
-                        span.style.color = 'rgb(${r},${g},${b})';
+                        span.style.color = `rgb(${r},${g},${b})`;
                     }
                     //1文字表示
                     document.getElementById("aa").appendChild(span);
@@ -125,7 +125,7 @@
             }
         }
 
-        const stopconvert = () => {
+        const stopConvert = () => {
             //変換の停止
             //__「タイマーID」をクリア
             clearInterval(timer);
@@ -151,12 +151,16 @@
     </script>
     <style>
         /* "#"...ID名をセレクタにする時に使用 */
+        body {
+            background-color: rgb(114, 147, 114);
+        }
+
         #aaText {
             font-family: monodpsce;
             text-align: center;
         }
 
-        border {
+        .border {
             border: thin solid #cccccc;
         }
 
@@ -194,8 +198,8 @@
 <body onload="init()">
     <p>アスキーアート動画変換</p>
     <input type="file" accept="video/*" onchange="loadVideo(this.files)">
-    暗←<input type="text" id="aaText" value="#$*+-.">→明
-    <input tyoe="checkbox" id="color">カラー
+    暗←<input type="text" id="aaText" value="MS%BG&SC?<i;:^-.">→明
+    <input type="checkbox" id="color">カラー
     <input type="button" id="convert" value="変換" onclick="startConvert()">
     <input type="button" value="停止" onclick="stopConvert()">
     <input type="button" value="コピー" onclick="copyAA()">
@@ -203,7 +207,7 @@
     <div id="videoArea">
         <video id="video" class="border" width="480" height="270" muted></video>
         <canvas id="image" width="96" height="54"></canvas>
-        <div id="aa" class="boeder"></div>
+        <div id="aa" class="border"></div>
     </div>
     <progress id="time" value="0" min="0" max="10" step="0.1"></progress>
     [<span id="sec">0</span>s]<br>
