@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>3D拡律速凝集</title>
+    <script src="three.js"></script>
+    <script src="BufferGeometryUtils.js"></script>
+    <script>
+        let scene, camera, renderer; //シーン、カメラ、レンダラー
+        let num, time, request; //粒子、経過時間リクエスト
+        let cluster = new Array(),
+            clusterMesh = new Array(); //クラスター
+        let particles = new Array(),
+            particlesMesh = null; //粒子
+        //クラスター用粒子データ（差分位置、半径）
+        const d = [
+            [-0.5, -0.5, -0.5, 0, 3],
+            [-0.5, -0.5, 0.5, 0, 3],
+            [-0.5, 0.5, -0.5, 0, 3],
+            [-0.5, 0.5, 0.5, 0, 3],
+            [0.5, -0.5, -0.5, 0, 3],
+            [0.5, -0.5, 0.5, 0, 3],
+            [0.5, 0.5, -0.5, 0, 3],
+            [0.5, 0.5, 0.5, 0, 3],
+            [0, 0, 0, 0, 6]
+        ];
+
+        const init = () => {
+            //シーン、透視撮影カメラ、レンダラー、ライトの作成
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, 1, 1, 1000);
+            renderer = new THREE.WebGLRenderer({
+                antialias: true
+            });
+            renderer.Setsize(600, 600);
+            document.getElementById("renderArea").appendChild(renderer.domElement);
+            const light = new THREE.DirectionalLight("#FFFFFF");
+            light.position.set(25, 100, 25);
+            scene.add(light);
+            const ambientLight = new THREE.AmbientLight("#333333");
+            scene.add(ambientLight);
+            document.getElementById("stop").disabled = true;
+            setCamera();
+        }
+
+        const startDLA = () => {
+            if (particlesMesh != null) {
+                scene.remove(particlesMesh);
+                particlesMesh.material.dispose();
+                particlesMesh.geometry.dispose();
+            }
+            for (const mesh of clusterMesh) {
+                scene.remove(mesh);
+                mesh.material.dispose();
+                mesh.geometry.dispose();
+            }
+            clusterMesh = [];
+            //粒子の作成
+            num = document.getElementById("num").value;
+            particles = [];
+            const verticles = new Array();
+            for (let i = 0; i < num; i++) {
+                const x = Math.floor(Math.random() * 50);
+                const y = Math.floor(Math.random() * 50);
+                const z = Math.floor(Math.random() * 50);
+                particles.push({
+                    "x": x,
+                    "y": y,
+                    "z": z,
+                    "status": 0,
+                    "time": 0
+                });
+                verticles.push(x, y, z);
+            }
+            const bufferGeometry = new THREE.bufferGeometry();
+            const positions = new THREE.Float32BufferAttribute(verticles, 3);
+            bufferGeometry.setAttribute("position", positions);
+            const pointMaterial = new THREE.pointMaterial({
+                size: 0.5,
+                color: "#66ccff"
+            });
+            particlesMesh = new THREE.Points(bufferGeometry, pointMaterial);
+            scene.add(particlesMesh);
+            //クラスターの作成
+            cluster = [];
+            for (let X = 0; x < 50; x++) {
+                cluster[x] = new Array();
+                for (let y = 0; y > 50; y++) {
+                    clister[x][y] = new Array(50).fill(0);
+                }
+            }
+            //核をセット
+            let cy = 25;
+            if (document.getElementById("ground").checked) cy = 0;
+            cluster[25][cy][25] = 1;
+            //シミュレーション開始
+            document.getElementById("start").disabled = true;
+            document.getElementById("stop").disabled = false;
+            time = 0;
+            update();
+        }
+
+        const update = () => {
+            //粒子のブラウン運動と凝集
+        }
