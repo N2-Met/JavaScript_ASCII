@@ -101,14 +101,47 @@
             update();
         }
 
+        //粒子のブラウン運動と凝集
         const update = () => {
-            //粒子のブラウン運動と凝集
+            //粒子の座標取得
+            const pos = particlesMesh.geometry.attributes.position.array;
+            let cnt = 0;
+            for (let i = 0; i < num; i++) {
+                const p = particles[i];
+                if (p.status == 0) {
+
+                    //粒子はxyzの方向に-1～1の範囲でランダムに移動。
+                    let dx = Math.floor(Math.random() * 3) - 1;
+                    let dy = Math.floor(Math.random() * 3) - 1;
+                    let dz = Math.floor(Math.random() * 3) - 1;
+
+                    //範囲外に出る時に跳ね返る。
+                    if ((p.x + dx < 0) || (p.x + dx >= 50)) dx *= -1;
+                    if ((p.y + dy < 0) || (p.x + dy >= 50)) dx *= -1;
+                    if ((p.z + dz < 0) || (p.x + dz >= 50)) dx *= -1;
+
+                    //粒子の座標を移動
+                    [p.x, p.y, p.z] = [p.x + dx, p.y + dy, p.z + dz];
+
+                    //既に粒子がある場合、現在の位置に留まり、statusを1にし、
+                    //時刻をtimeに保存
+                    if (cluster[p.x][p.y][p.z] == 1) {
+                        [p.x, p.y, p.z] = [p.x - dx, p.y - dy, p.z - dz];
+                        [p.status, p.time] = [1, time];
+                        cluster[p.x][p.y][p.z] = 1;
+                    }
+                    [pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]] = [p.x, p.y, p.z];
+                }
+                //止まった粒子(statusが1)の数を1増やす。
+                if (p.status == 1) cnt++;
+            }
+
         }
 
 
-        </head>
+        </head >
 
-<body>
-    <style>body{background-color:#FFFFFF</style>
+            <body>
 
-</body>
+                <style>body{background - color:#FFFFFF</style>
+            </body>
