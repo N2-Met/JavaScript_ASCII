@@ -135,8 +135,38 @@
                 //止まった粒子(statusが1)の数を1増やす。
                 if (p.status == 1) cnt++;
             }
-
         }
+//粒子の移動を反映
+particlesMesh.geometry.attributes.position.needsUpdate =true;
+
+//進捗の表示
+//__プログレスバーを更新しパーセントを表示
+document.getElementById("progress").value = Math.floor(cnt/num*100);
+document.getElementById("per").innerText = (cnt/num*100).toFixed(2);
+time++;
+//シミュレーション終了
+//__全ての粒子が止まったと時
+if (cnt == num) {
+    stopDLA();
+    setClusterMesh();
+}else{
+    //アニメーションを行なう。
+    request= window.requestAnimationFrame(update);
+}
+renderer.renderer(scene,camera);
+
+const setClusterMesh = () =>{
+    //クラスターの3Dオブジェクトを作成
+    const spheres = newArray();
+    const materials = newArray();
+    //粒子を30色に分ける。
+    for (let i=0; i<30; i++){
+
+    }
+
+}
+
+
 
 
         </head >
