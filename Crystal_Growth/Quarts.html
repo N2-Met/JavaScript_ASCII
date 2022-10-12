@@ -136,35 +136,46 @@
                 if (p.status == 1) cnt++;
             }
         }
-//粒子の移動を反映
-particlesMesh.geometry.attributes.position.needsUpdate =true;
+        //粒子の移動を反映
+        particlesMesh.geometry.attributes.position.needsUpdate = true;
 
-//進捗の表示
-//__プログレスバーを更新しパーセントを表示
-document.getElementById("progress").value = Math.floor(cnt/num*100);
-document.getElementById("per").innerText = (cnt/num*100).toFixed(2);
-time++;
-//シミュレーション終了
-//__全ての粒子が止まったと時
-if (cnt == num) {
-    stopDLA();
-    setClusterMesh();
-}else{
-    //アニメーションを行なう。
-    request= window.requestAnimationFrame(update);
-}
-renderer.renderer(scene,camera);
+        //進捗の表示
+        //__プログレスバーを更新しパーセントを表示
+        document.getElementById("progress").value = Math.floor(cnt / num * 100);
+        document.getElementById("per").innerText = (cnt / num * 100).toFixed(2);
+        time++;
+        //シミュレーション終了
+        //__全ての粒子が止まったと時
+        if (cnt == num) {
+            stopDLA();
+            setClusterMesh();
+        } else {
+            //アニメーションを行なう。
+            request = window.requestAnimationFrame(update);
+        }
+        renderer.renderer(scene, camera);
 
-const setClusterMesh = () =>{
-    //クラスターの3Dオブジェクトを作成
-    const spheres = newArray();
-    const materials = newArray();
-    //粒子を30色に分ける。
-    for (let i=0; i<30; i++){
+        const setClusterMesh = () => {
+            //クラスターの3Dオブジェクトを作成
+            const spheres = newArray();
+            const materials = newArray();
+            //粒子を30色に分ける。
+            for (let i = 0; i < 30; i++) {
+                spheres[i] = newArray();
+                const hsl = `hsl($240-i*5),100%,50%)`;
+                materials[i] = new THREE.MeshPhongMaterial({ color: hsl });
+            }
+            for (const p of particles) {
+                const t = Math.floor(p.time / time * 30);
+                for (let i = 0; i < 9; i++) {
+                    const sphere = new THREE.SphereGeometry(d[i][3], 4, 4);
+                    sphere.translate(p.x + d[i][0], p.y + d[i][1], p.z + d[i][2]);
+                    spheres[t].push(sphere);
+                }
+            }
+            let geometry, meth
 
-    }
-
-}
+        }
 
 
 
