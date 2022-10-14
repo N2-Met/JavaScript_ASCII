@@ -173,16 +173,36 @@
                     spheres[t].push(sphere);
                 }
             }
-            let geometry, meth
-
+            let geometry, mesh;
+            for (let i = 0; i < spheres.length; i++) {
+                if (spheres[i].length == 0) continue;
+                geometry = THREE.BufferGeometryUtils.mergeBufferGeometries(spheres[i]);
+                mesh = new THREE.Mesh(geometry, materials[i]);
+                scenes.add(mesh);
+                clusterMesh.push(mesh);
+            }
         }
+const stopDLA = () =>{
+    //DLAシミュレーションの停止
+    window.cancelAnimationFrame(request);
+    document.getElementById("start").disabled = false;
+    document.getElementById("stop").disabled = true;
+}
+</script>
+</head>
+<body onload ="init()">
+<p>3D 拡散率速凝集シミュレーション</p>
+粒子の数：<input type="number" id="num" value="5000" step="1000" style="width: 60px">
+核の位置：<input type="radio" name="type" id="center" checked>中心
+<input type="radio" name="type" id="ground">地面
+<input type="button" id="start" value="スタート"  onclick="startDLA()">
+<input type="button" id="stop" value="ストップ" onclick="stopDLA()">
+<progress id="progress" value="0" min="0" maz="100"></progress>
+<span id="per">0.0</span>%<hr>
+カメラ：<input type="range" id="angle" value="0" min="-180" max="180"
+oninput="setCamera()">[<span id="textAngle">0</span>°]<hr>
+<div id="renderArea"></div>
+</body>
+</html>
 
 
-
-
-        </head >
-
-            <body>
-
-                <style>body{background - color:#FFFFFF</style>
-            </body>
