@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-    <meta charset="UTF-8">
-    <title>3D拡律速凝集</title>
-    <script src="three.js"></script>
-    <script src="BufferGeometryUtils.js"></script>
-    <script>
+    <head>
+        <meta charset="UTF-8">
+        <title>3D拡律速凝集</title>
+        <script src="three.js"></script>
+        <script src="BufferGeometryUtils.js"></script>
+        <script>
         let scene, camera, renderer; //シーン、カメラ、レンダラー
         let num, time, request; //粒子、経過時間リクエスト
         let cluster = new Array(),
@@ -33,7 +33,7 @@
             renderer = new THREE.WebGLRenderer({
                 antialias: true
             });
-            renderer.Setsize(600, 600);
+            renderer.setSize(600, 600);
             document.getElementById("renderArea").appendChild(renderer.domElement);
             const light = new THREE.DirectionalLight("#FFFFFF");
             light.position.set(25, 100, 25);
@@ -43,7 +43,7 @@
             document.getElementById("stop").disabled = true;
             setCamera();
         }
-
+        //geometry　→　幾何学、形状
         const startDLA = () => {
             if (particlesMesh != null) {
                 scene.remove(particlesMesh);
@@ -73,10 +73,10 @@
                 });
                 verticles.push(x, y, z);
             }
-            const bufferGeometry = new THREE.bufferGeometry();
+            const bufferGeometry = new THREE.BufferGeometry();
             const positions = new THREE.Float32BufferAttribute(verticles, 3);
             bufferGeometry.setAttribute("position", positions);
-            const pointMaterial = new THREE.pointMaterial({
+            const pointMaterial = new THREE.PointsMaterial({
                 size: 0.5,
                 color: "#66ccff"
             });
@@ -84,10 +84,10 @@
             scene.add(particlesMesh);
             //クラスターの作成
             cluster = [];
-            for (let X = 0; x < 50; x++) {
+            for (let x=0; x<50; x++) {
                 cluster[x] = new Array();
                 for (let y = 0; y > 50; y++) {
-                    clister[x][y] = new Array(50).fill(0);
+                    cluster[x][y] = new Array(50).fill(0);
                 }
             }
             //核をセット
@@ -189,20 +189,19 @@ const stopDLA = () =>{
     document.getElementById("stop").disabled = true;
 }
 </script>
-</head>
-<body onload ="init()">
-<p>3D 拡散率速凝集シミュレーション</p>
-粒子の数：<input type="number" id="num" value="5000" step="1000" style="width: 60px">
-核の位置：<input type="radio" name="type" id="center" checked>中心
-<input type="radio" name="type" id="ground">地面
-<input type="button" id="start" value="スタート"  onclick="startDLA()">
-<input type="button" id="stop" value="ストップ" onclick="stopDLA()">
-<progress id="progress" value="0" min="0" maz="100"></progress>
-<span id="per">0.0</span>%<hr>
-カメラ：<input type="range" id="angle" value="0" min="-180" max="180"
-oninput="setCamera()">[<span id="textAngle">0</span>°]<hr>
-<div id="renderArea"></div>
-</body>
+    </head>
+    <body onload="init()" style="background-color:rgb(170, 151, 151)">
+        <p>3D 拡散率速凝集シミュレーション</p>
+        粒子の数：<input type="number" id="num" value="5000" step="1000"
+            style="width: 60px">
+        核の位置：<input type="radio" name="type" id="center" checked>中心
+        <input type="radio" name="type" id="ground">地面
+        <input type="button" id="start" value="スタート" onclick="startDLA()">
+        <input type="button" id="stop" value="ストップ" onclick="stopDLA()">
+        <progress id="progress" value="0" min="0" maz="100"></progress>
+        <span id="per">0.0</span>%<hr>
+        カメラ：<input type="range" id="angle" value="0" min="-180" max="180"
+            oninput="setCamera()">[<span id="textAngle">0</span>°]<hr>
+        <div id="renderArea"></div>
+    </body>
 </html>
-
-
