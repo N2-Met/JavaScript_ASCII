@@ -27,7 +27,7 @@
         ];
 
         const init = () => {
-            //シーン、透視撮影カメラ、レンダラー、ライトの作成
+        //シーン、透視撮影カメラ、レンダラー、ライトの作成
             scene = new THREE.Scene();
             camera = new THREE.PerspectiveCamera(60, 1, 1, 1000);
             renderer = new THREE.WebGLRenderer({
@@ -43,6 +43,19 @@
             document.getElementById("stop").disabled = true;
             setCamera();
         }
+
+        const setCamera= () =>{
+        //カメラ位置の変更
+            const angle = Number(document.getElementById("angle").value);
+            document.getElementById("textAngle").innerText= angle;
+            camera.position.x = 75* Math.cos(angle* Math.PI/180) + 25;
+            camera.position.y = 60;
+            camera.position.z = 75* Math.sin(angle* Math.PI/180) + 25;
+            camera.lookAt(new THREE.Vector3(25,25,25));
+            renderer.render(scene,camera);
+        }
+
+
         //geometry　→　幾何学、形状
         const startDLA = () => {
             if (particlesMesh != null) {
@@ -59,7 +72,7 @@
             //粒子の作成
             num = document.getElementById("num").value;
             particles = [];
-            const verticles = new Array();
+            const vertices = new Array();
             for (let i = 0; i < num; i++) {
                 const x = Math.floor(Math.random() * 50);
                 const y = Math.floor(Math.random() * 50);
@@ -71,10 +84,10 @@
                     "status": 0,
                     "time": 0
                 });
-                verticles.push(x, y, z);
+                vertices.push(x, y, z);
             }
             const bufferGeometry = new THREE.BufferGeometry();
-            const positions = new THREE.Float32BufferAttribute(verticles, 3);
+            const positions = new THREE.Float32BufferAttribute(vertices, 3);
             bufferGeometry.setAttribute("position", positions);
             const pointMaterial = new THREE.PointsMaterial({
                 size: 0.5,
@@ -86,11 +99,10 @@
             cluster = [];
             for (let x=0; x<50; x++) {
                 cluster[x] = new Array();
-                for (let y = 0; y > 50; y++) {
+                for (let y = 0; y < 50; y++) {
                     cluster[x][y] = new Array(50).fill(0);
                 }
-            }
-            //核をセット
+            }            //核をセット
             let cy = 25;
             if (document.getElementById("ground").checked) cy = 0;
             cluster[25][cy][25] = 1;
@@ -117,8 +129,8 @@
 
                     //範囲外に出る時に跳ね返る。
                     if ((p.x + dx < 0) || (p.x + dx >= 50)) dx *= -1;
-                    if ((p.y + dy < 0) || (p.x + dy >= 50)) dx *= -1;
-                    if ((p.z + dz < 0) || (p.x + dz >= 50)) dx *= -1;
+                    if ((p.y + dy < 0) || (p.y + dy >= 50)) dx *= -1;
+                    if ((p.z + dz < 0) || (p.z + dz >= 50)) dx *= -1;
 
                     //粒子の座標を移動
                     [p.x, p.y, p.z] = [p.x + dx, p.y + dy, p.z + dz];
@@ -126,6 +138,7 @@
                     //既に粒子がある場合、現在の位置に留まり、statusを1にし、
                     //時刻をtimeに保存
                     if (cluster[p.x][p.y][p.z] == 1) {
+                        camera.position.x = 75* Math.cos(angle* Math.PI/180) + 25;
                         [p.x, p.y, p.z] = [p.x - dx, p.y - dy, p.z - dz];
                         [p.status, p.time] = [1, time];
                         cluster[p.x][p.y][p.z] = 1;
@@ -198,7 +211,7 @@ const stopDLA = () =>{
         <input type="radio" name="type" id="ground">地面
         <input type="button" id="start" value="スタート" onclick="startDLA()">
         <input type="button" id="stop" value="ストップ" onclick="stopDLA()">
-        <progress id="progress" value="0" min="0" maz="100"></progress>
+        <progress id="progress" value="0" min="0" max="100"></progress>
         <span id="per">0.0</span>%<hr>
         カメラ：<input type="range" id="angle" value="0" min="-180" max="180"
             oninput="setCamera()">[<span id="textAngle">0</span>°]<hr>
