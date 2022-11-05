@@ -32,31 +32,88 @@
 
             //平行投影カメラの作成（ニアクリップ：1、ファークリップ：200）
             //__平行投影カメラを作成
-            camera = new THREE.orthographicCamera(-85,85,85,-85,1,200);
+            camera = new THREE.orthographicCamera(-85, 85, 85, -85, 1, 200);
             //__カメラの初期位置は(60,0,0)で、(-60,0,0)の方を向く。
-            camera.position.set(num,0,0);
-            vcamera.lookAt(new THREE.Vector3(-num,0,0));
+            camera.position.set(num, 0, 0);
+            vcamera.lookAt(new THREE.Vector3(-num, 0, 0));
 
             //レンダラーの作成
-            renderer = new THREE.WebGLRenderer({antialias:true});
-            renderer.setSize(600,600);
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(600, 600);
             //__描画エリアに作成
             document.getElementById("renderArea").appendChild(renderer.domElement);
 
+            //ライトの作成（平行光源、環境光）
+            //__白色の平行光源
+            const light = new THREE.DirectionalLight("#FFFFFF");
+            light.position.set(200, 100, 100);
+            scene.add(light);
+            //__濃いグレーの環境光  ambient:周囲
+            const ambientLight = new THREE.ambientLight("#333333");
+            scene.add(ambientLight);
+
+            //初期画像（グラデーション）
+            //__円形グラデーションを作成
+            const grad = context.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+            //__グラデーションの色（グレーのみ）を設定
+            grad.addColorStop(0, "#000000");
+            grad.addColorStop(0.3, "#cccccc");
+            grad.addColorStop(0.7, "#999999");
+            grad.addColorStop(1, "#FFFFFF");
+            context.fillStyle = grad;
+            context.fillRect(0, 0, w, w);
+            setHalftone();
+
+            //描画
+            update();
+        }
+
+
+        const setCamera = (front = false) => {
+            //※↑　frontのデフォルト値はfalse
+            //カメラ位置の変更
+            if (front) document.getElementById("angle").value = 0;
+            //__角度スライダーの値を取得
+            const angle = Number(document.getElementById("angle").value);
+            const text = angle.toFixced(1);
+            document.getElementById("textAngle").innerText = `[${text}°]`;
+            //__角度からカメラの位置を計算
+            camera.position.x = num * 2 * Math.cos(angle * Math.PI / 180) - num;
+            camera.position.z = num * 2 * Math.sin(angle * Math.PI / 180);
+            camera.lookAt(new THREE.Vector3(-num, 0, 0));
+        }
+
+        const liadImage = (files) => {
+            //__↑files：「ファイル選択ボタン」で指定した画像ファイル
+            // 画像の読み込み
+            const image = new Image();
+            image.src = URL.createObjectURL(files[0]);
+            image.onload = () =>{
+                //画像の描画
+                let sx,sy,sw;
+                if (image.width > image.height){
+                    sw  = image.width;
+                    [sx,sy] = [0,image.height/2 - image.height/2];
+                }else{
+                    sw  = image.height;
+                    [sx,sy] = [0,image.height/2 - image.height/2];
+
+                }
+
+
+
+                }
 
 
 
 
-
-
-
-
-
-
-
-
+            }
 
         }
+
+
+
+
 
 
 
