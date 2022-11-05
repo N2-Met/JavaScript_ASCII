@@ -1,18 +1,70 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D 点描（ハーフトーン）</title>
-    <sript swrc = "three.js"></sript>
+    <sript swrc="three.js"></sript>
     <script>
-        let canvas ,context;
-        let monoCanvas,monoCOntext;
+        let canvas, context; //画像用キャンバス
+        let monoCanvas, monoCOntext; //モノクロ（ハーフトーン）用キャンバス
+        let scene, camera, renderer, points; //シーン、カメラ、レンダラー、点描
+        const w = 240, num = 60; //キャンバスサイズ、一辺の点の数。
+
+        const init = () => {
+            //キャンバスの取得
+            //__画像用キャンバスの取得
+            canvas = document.getElementById("image");
+            context = canvas.getContext("2d");
+
+            //モノクロ用キャンバスを取得
+            monoCanvas = document.getElementById("mono");
+            monoContext = monoCanvas.getContext("2d");
+
+            // キャンバスサイズを240 * 240 に
+            [canvas.width, cavas.height] = [w, w];
+            [monoCanvas.width, monoCanvas.height] = [w, w];
+
+            //シーンの作成
+            scene = new THREE.Scene();
+
+            //平行投影カメラの作成（ニアクリップ：1、ファークリップ：200）
+            //__平行投影カメラを作成
+            camera = new THREE.orthographicCamera(-85,85,85,-85,1,200);
+            //__カメラの初期位置は(60,0,0)で、(-60,0,0)の方を向く。
+            camera.position.set(num,0,0);
+            vcamera.lookAt(new THREE.Vector3(-num,0,0));
+
+            //レンダラーの作成
+            renderer = new THREE.WebGLRenderer({antialias:true});
+            renderer.setSize(600,600);
+            //__描画エリアに作成
+            document.getElementById("renderArea").appendChild(renderer.domElement);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        }
+
+
 
     </script>
 </head>
+
 <body>
 
 </body>
+
 </html>
