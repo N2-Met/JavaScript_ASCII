@@ -93,23 +93,23 @@
                 let sx,sy,sw;
                 if (image.width > image.height){
                     sw  = image.width;
-                    [sx,sy] = [0,image.height/2 - image.height/2];
+                    [sx,sy] = [0,image.height/2 - image.width/2];
                 }else{
                     sw  = image.height;
-                    [sx,sy] = [0,image.height/2 - image.height/2];
-
+                    [sx,sy] = [0,image.width/2 - image.height/2];
                 }
-
-
-
+                context.fillStyle = "#FFFFFF";
+                context.fillRect(0,0,w,w);
+                context.drawImage(image,sx,sy,sw,sw,0,0,w,w);
+                //ハーフトーン加工
+                setHalftone();
                 }
+            }
 
-
-
+            const setHalftone = () =>{
 
             }
 
-        }
 
 
 
