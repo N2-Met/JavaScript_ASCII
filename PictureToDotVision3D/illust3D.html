@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>3D描画（ハーフトーン）</title>
+    <!-- <script src="three.js"></script> -->
+    <!-- <script type="module" src="three.js"></script> -->
+    <!-- <script src="./src/three.js"></script> -->
+    <!-- <script type="module" src="./src/three.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r123/three.min.js"></script>
+
+
+    <script>
+        let canvas, context;
+        let monoCanvas, monoContext;
+        let scene, camera, renderer, points;
+        const w = 240, num = 60;
+
+        const init = () => {
+            // キャンバスの準備
+            canvas = document.getElementById("image");
+            context = canvas.getContext("2d");
+            monoCanvas = document.getElementById("mono");
+            monoContext = monoCanvas.getContext("2d");
+            [canvas.width, canvas.height] = [w, w];
+            [monoCanvas.width, monoCanvas.height] = [w, w];
+
+            // シーンの作成
+            scene = new THREE.Scene();
+            // 平行投影カメラの作成(ニアクリップ:1、ファークリップ:200)
+            camera = new THREE.OrthographicCamera(-85, 85, 85, -85, 1, 200);
+            camera.position.set(num, 0, 0);
+            camera.lookAt(new THREE.Vector3(-num, 0, 0));
+
+            // レンダラーの作成
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(600, 600);
+            document.getElementById("renderArea").appendChild(renderer.domElement);
+
+            // ライトの作成
+            const light = new THREE.DirectionalLight("#FFFFFF");
+            light.position.set(200, 100, 100);
+            scene.add(light);
+            const ambientLight = new THREE.AmbientLight("#333333");
+            scene.add(ambientLight);
+
+            // 初期画像(グラデーション)
+            const grad = context.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w);
+            grad.addColorStop(0, "#000000");
+            grad.addColorStop(0.3, "#CCCCCC");
+            grad.addColorStop(0.7, "#999999");
+            grad.addColorStop(1, "#FFFFFF");
+            context.fillStyle = grad;
+            context.fillRect(0, 0, w, w);
+            setHalftone();
+            // 描画
+            update();
+
+        }
+
+        const setCamera = (front = false) => {
+            // カメラ位置の変更
+            if (front) document.getElementById("angle").value = 0;
+            const angle = Number(document.getElementById("angle").value);
+            const text = angle.toFixed(1);
+            document.getElementById("textAngle").innerText = `[${text}°]`;
+            // document.getElementById("textAngle").innerText = `[${text}° ]`;
+            camera.position.x = num * 2 * Math.cos(angle * Math.PI / 180) - num;
+            camera.position.z = num * 2 * Math.sin(angle * Math.PI / 180);
+            camera.lookAt(new THREE.Vector3(-num, 0, 0));
+        };
+
+        const loadImage = (files) => {
+            // 画像の読み込み
+            const image = new Image();
+            image.src = URL.createObjectURL(files[0]);
+            image.onload = () => {
+                //画像の描画
+                let sx, sy, sw;
+                if (image.width > image.height) {
+                    sw = image.width;
+                    [sx, sy] = [0, image.height / 2 - image.width / 2];
+                } else {
+                    sw = image.height;
+                    [sx, sy] = [image.width / 2 - image.height / 2, 0];
+                }
+                context.fillStyle = "#FFFFFF";
+                context.fillRect(0, 0, w, w);
+                context.drawImage(image, sx, sy, sw, sw, 0, 0, w, w);
+                //ハーフトーン加工
+                setHalftone();
+            }
+        }
+
+        const setHalftone = () => {
+            // ハーフトーン加工、点描の作成
+            const imageData = context.getImageData(0, 0, w, w);
+            monoContext.clearRect(0, 0, w, w);
+            monoContext.fillStyle = "#000000";
+            scene.remove(points);
+            const geometry = new THREE.Geometry;
+            const material = new THREE.MeshPhongMaterial({ color: "#FFFFFF" });
+
+            const d = w / num;
+            for (var y = 0; y < w; y += d) {
+                for (var x = 0; x < w; x += d) {
+                    //輝度をドットの半径に変換
+                    const l = getLuminance(imageData, x, y, d);
+                    const r = d - d * l;
+                    monoContext.beginPath();
+                    monoContext.arc(x + d / 2, y + d / 2, r, 0, Math.PI * 2);
+                    monoContext.fill();
+                    //点（球）を追加
+                    if (l > 0.1) {
+                        const px = -num * 2 * (1 - l);
+                        const py = num - y / d * 2;
+                        const pz = num - x / d * 2;
+                        const sphere = new THREE.SphereGeometry(l, 4, 4);
+                        const point = new THREE.Mesh(sphere);
+                        point.position.set(px, py, pz);
+                        geometry.mergeMesh(point);
+
+                    }
+                }
+            }
+
+            points = new THREE.Mesh(geometry, material);
+            scene.add(points);
+        }
+
+        const getLuminance = (imageData, x, y, d) => {
+            //RGBの平均値を取得
+            let r = 0, g = 0, b = 0;
+            for (let dy = 0; dy < d; dy++) {
+                for (let dx = 0; dx < d; dx++) {
+                    const index = ((y + dy) * w + (x + dx)) * 4;
+                    r += imageData.data[index];
+                    g += imageData.data[index + 1];
+                    b += imageData.data[index + 2];
+                }
+            }
+            [r, g, b] = [r / (d * d), g / (d * d), b / (d * d)];
+            //輝度を計算
+            return (0.299 * r + 0.587 * g + 0.114 * b) / 256;
+        };
+
+
+        const update = () => {
+            //回転
+            if (document.getElementById("rotate").checked) {
+                let angle = Number(document.getElementById("angle").value);
+                angle += 0.1;
+                if (angle > 180) angle -= 360;
+                document.getElementById("angle").value = angle;
+                setCamera();
+            }
+            //描画
+            renderer.render(scene, camera);
+            window.requestAnimationFrame(update);
+        }
+    </script>
+
+
+    <style>
+        #renderArea {
+            float: left;
+            margin-right: 10px;
+        }
+
+        canvas {
+            border: thin solid #CCCCCC;
+        }
+    </style>
+</head>
+
+<body onload="init()">
+    <p> 3D描画（ハーフトーン）</p>
+    <hr>
+    カメラ：<input type="button" value="正面に戻す" onclick="setCamera(true)">
+    <input type="checkbox" id="rotate">回転
+    <input type="range" id="angle" value="0" min="-180" max="180" step="0.1" oninput="setCamera()">
+    <span id="textAngle">[90° ]</span>
+    <hr>
+    <div id="renderArea"></div>
+    <input type="file" accept="image/*" onchange="loadImage(this.files)"><br>
+
+    <canvas id="image"> </canvas><br>
+    <canvas id="mono"> </canvas>
+</body>
+
+</html>
